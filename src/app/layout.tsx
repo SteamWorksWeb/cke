@@ -56,7 +56,7 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
     images: [
       {
-        url: "/images/logo.png",
+        url: `${SITE_URL}/images/socialshare.png`,
         width: 1200,
         height: 630,
         alt: SITE_NAME,
@@ -69,7 +69,7 @@ export const metadata: Metadata = {
     title: SITE_NAME,
     description: SITE_DESCRIPTION,
     creator: "@clayknowseverything",
-    images: ["/images/logo.png"],
+    images: [`${SITE_URL}/images/socialshare.png`],
   },
 
   robots: {
