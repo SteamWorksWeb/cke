@@ -94,9 +94,8 @@ export async function generateMetadata({
     ?.slice(0, 160) || "";
 
   const title = data.title ?? slug;
-  const image = data.featuredImage
-    ? `https://clayknowseverything.com${data.featuredImage}`
-    : "https://clayknowseverything.com/images/logo.png";
+  // Truncate og:title to 60 chars — sweet spot for X, LinkedIn, Google
+  const ogTitle = title.length > 60 ? title.slice(0, 57) + "…" : title;
 
   return {
     title,
@@ -107,18 +106,18 @@ export async function generateMetadata({
     openGraph: {
       type: "article",
       url: `https://clayknowseverything.com/blog/${slug}`,
-      title,
+      title: ogTitle,
       description: excerpt,
       siteName: "Clay Knows Everything",
       publishedTime: data.date ? new Date(data.date).toISOString() : undefined,
       authors: ["Clay"],
-      images: [{ url: image, width: 1200, height: 630, alt: title }],
+      // No images here — opengraph-image.tsx generates the correct 1200x630 card
     },
     twitter: {
       card: "summary_large_image",
-      title,
+      title: ogTitle,
       description: excerpt,
-      images: [image],
+      // No images here — twitter-image.tsx handles this
     },
   };
 }
