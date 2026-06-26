@@ -33,7 +33,7 @@ export const metadata: Metadata = {
 export interface PostSummary {
   title: string;
   date: string;
-  mtime: number;
+  sortKey: string;
   slug: string;
   categories: string[];
   primaryCat: string;
@@ -69,7 +69,6 @@ function getAllPosts(): PostSummary[] {
       const filePath = path.join(contentDir, file);
       const raw = fs.readFileSync(filePath, "utf8");
       const { data, content } = matter(raw);
-      const mtime = fs.statSync(filePath).mtimeMs;
 
       const categories: string[] = Array.isArray(data.categories)
         ? data.categories
@@ -92,10 +91,12 @@ function getAllPosts(): PostSummary[] {
           .filter(Boolean)[0]
           ?.slice(0, 160) || "";
 
+      const sortKey: string = data.datetime || data.date || "";
+
       return {
         title: data.title || file.replace(".mdx", ""),
         date: data.date || "",
-        mtime,
+        sortKey,
         slug: data.slug || file.replace(".mdx", ""),
         categories,
         primaryCat: primCat,
@@ -103,10 +104,7 @@ function getAllPosts(): PostSummary[] {
         excerpt,
       };
     })
-    .sort((a, b) => {
-      if (b.date !== a.date) return b.date > a.date ? 1 : -1;
-      return b.mtime - a.mtime;
-    });
+    .sort((a, b) => (b.sortKey > a.sortKey ? 1 : -1));
 }
 
 /* ── Page ── */

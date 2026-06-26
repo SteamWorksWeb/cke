@@ -8,7 +8,7 @@ import Link from "next/link";
 interface Post {
   title: string;
   date: string;
-  mtime: number;
+  sortKey: string;
   slug: string;
   categories: string[];
   featuredImage: string | null;
@@ -53,7 +53,6 @@ function getAllPosts(): Post[] {
     const filePath = path.join(contentDir, file);
     const raw = fs.readFileSync(filePath, "utf8");
     const { data, content } = matter(raw);
-    const mtime = fs.statSync(filePath).mtimeMs;
 
     // Featured image from frontmatter (set by migration)
     const featuredImage: string | null =
@@ -64,16 +63,21 @@ function getAllPosts(): Post[] {
       .replace(/!\[.*?\]\(.*?\)/g, "")
       .replace(/#{1,6}\s+/g, "")
       .replace(/\*\*|__|\*|_/g, "")
-      .replace(/\[([^\]]+)\]\([^\)]+\)/g, "$1")
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
       .split("\n")
       .map((l: string) => l.trim())
       .filter(Boolean)[0]
       ?.slice(0, 160) || "";
 
+    // Use datetime (with time) when present, else bare date.
+    // "2026-06-26T19:00:00" > "2026-06-26" lexicographically, so
+    // posts with a datetime always sort above same-day posts without one.
+    const sortKey: string = data.datetime || data.date || "";
+
     return {
       title: data.title || file.replace(".mdx", ""),
       date: data.date || "",
-      mtime,
+      sortKey,
       slug: data.slug || file.replace(".mdx", ""),
       categories: Array.isArray(data.categories) ? data.categories : [],
       featuredImage,
@@ -81,11 +85,8 @@ function getAllPosts(): Post[] {
     };
   });
 
-  // Sort newest-first by date; use file mtime as tiebreaker for same-day posts
-  return posts.sort((a, b) => {
-    if (b.date !== a.date) return b.date > a.date ? 1 : -1;
-    return b.mtime - a.mtime;
-  });
+  // Sort newest-first by sortKey (datetime when available, else date)
+  return posts.sort((a, b) => (b.sortKey > a.sortKey ? 1 : -1));
 }
 
 /* ── Page ── */
