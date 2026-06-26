@@ -8,6 +8,7 @@ import Link from "next/link";
 interface Post {
   title: string;
   date: string;
+  mtime: number;
   slug: string;
   categories: string[];
   featuredImage: string | null;
@@ -49,8 +50,10 @@ function getAllPosts(): Post[] {
   const files = fs.readdirSync(contentDir).filter((f) => f.endsWith(".mdx"));
 
   const posts = files.map((file) => {
-    const raw = fs.readFileSync(path.join(contentDir, file), "utf8");
+    const filePath = path.join(contentDir, file);
+    const raw = fs.readFileSync(filePath, "utf8");
     const { data, content } = matter(raw);
+    const mtime = fs.statSync(filePath).mtimeMs;
 
     // Featured image from frontmatter (set by migration)
     const featuredImage: string | null =
@@ -70,6 +73,7 @@ function getAllPosts(): Post[] {
     return {
       title: data.title || file.replace(".mdx", ""),
       date: data.date || "",
+      mtime,
       slug: data.slug || file.replace(".mdx", ""),
       categories: Array.isArray(data.categories) ? data.categories : [],
       featuredImage,
@@ -77,7 +81,11 @@ function getAllPosts(): Post[] {
     };
   });
 
-  return posts.sort((a, b) => (b.date > a.date ? 1 : -1));
+  // Sort newest-first by date; use file mtime as tiebreaker for same-day posts
+  return posts.sort((a, b) => {
+    if (b.date !== a.date) return b.date > a.date ? 1 : -1;
+    return b.mtime - a.mtime;
+  });
 }
 
 /* ── Page ── */
