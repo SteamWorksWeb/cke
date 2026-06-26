@@ -32,6 +32,37 @@ function primaryCategory(cats: string[]): string {
   )[0] ?? cats[0];
 }
 
+/* ── Related posts ── */
+interface RelatedPost {
+  title: string;
+  slug: string;
+  featuredImage: string | null;
+  date: string;
+  categories: string[];
+}
+
+function getRelatedPosts(currentSlug: string, categoryName: string, limit = 3): RelatedPost[] {
+  const files = fs.readdirSync(CONTENT_DIR).filter((f) => f.endsWith(".mdx"));
+  return files
+    .map((file) => {
+      const slug = file.replace(".mdx", "");
+      if (slug === currentSlug) return null;
+      const { data } = matter(fs.readFileSync(path.join(CONTENT_DIR, file), "utf8"));
+      const cats: string[] = Array.isArray(data.categories) ? data.categories : [];
+      if (primaryCategory(cats) !== categoryName) return null;
+      return {
+        title: data.title || slug,
+        slug: data.slug || slug,
+        featuredImage: data.featuredImage || null,
+        date: data.date || "",
+        categories: cats,
+      };
+    })
+    .filter((p): p is RelatedPost => p !== null)
+    .sort((a, b) => (b.date > a.date ? 1 : -1))
+    .slice(0, limit);
+}
+
 /* ── Static params — one per MDX file ── */
 export async function generateStaticParams() {
   const files = fs.readdirSync(CONTENT_DIR).filter((f) => f.endsWith(".mdx"));
@@ -129,6 +160,7 @@ export default async function BlogPostPage({
   const badgeColor = CATEGORY_COLORS[primCat] ?? "bg-gray-700";
   const featuredImage: string | null =
     data.featuredImage && data.featuredImage !== "" ? data.featuredImage : null;
+  const relatedPosts = primCat ? getRelatedPosts(slug, primCat) : [];
 
   // Article JSON-LD schema
   const articleJsonLd = {
@@ -187,6 +219,28 @@ export default async function BlogPostPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
+      {/* ── Visual Breadcrumb ── */}
+      <nav className="max-w-4xl mx-auto px-6 pt-6 pb-2" aria-label="Breadcrumb">
+        <ol className="flex items-center gap-2 text-xs text-gray-400 flex-wrap">
+          <li><Link href="/" className="hover:text-orange-500 transition-colors">Home</Link></li>
+          {primCat && (
+            <>
+              <li aria-hidden>·</li>
+              <li>
+                <Link
+                  href={`/category/${primCat.toLowerCase().replace(" ", "-")}`}
+                  className="hover:text-orange-500 transition-colors"
+                >
+                  {primCat}
+                </Link>
+              </li>
+            </>
+          )}
+          <li aria-hidden>·</li>
+          <li className="text-gray-600 font-medium line-clamp-1 max-w-xs">{data.title}</li>
+        </ol>
+      </nav>
+
       {/* ── Hero ── */}
       {featuredImage && (
         <div className="relative w-full h-[420px] md:h-[520px] bg-gray-900 overflow-hidden">
@@ -235,7 +289,7 @@ export default async function BlogPostPage({
 
       {/* ── Article Body ── */}
       <div className="max-w-3xl mx-auto px-6 py-12">
-        {/* Author chip */}
+        {/* Author chip + reading time */}
         <div className="flex items-center gap-3 mb-10 pb-6 border-b border-gray-100">
           <div className="w-11 h-11 rounded-full overflow-hidden flex-shrink-0 border-2 border-gray-100">
             <Image
@@ -248,7 +302,7 @@ export default async function BlogPostPage({
           </div>
           <div>
             <p className="text-sm font-semibold text-black">Clay</p>
-            <p className="text-xs text-gray-400">{data.date}</p>
+            <p className="text-xs text-gray-400">{data.date} &nbsp;·&nbsp; {readingTime} min read</p>
           </div>
           {primCat && (
             <span className={`ml-auto ${badgeColor} text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-md`}>
@@ -281,6 +335,60 @@ export default async function BlogPostPage({
           )}
         </div>
       </div>
+
+      {/* ── Related Posts ── */}
+      {relatedPosts.length > 0 && (
+        <section className="border-t border-gray-100 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-6 py-14">
+            <div className="flex items-center gap-3 mb-8">
+              {primCat && (
+                <span className={`${badgeColor} text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-md`}>
+                  {primCat}
+                </span>
+              )}
+              <h2 className="font-[family-name:var(--font-playfair)] text-2xl font-bold text-black">
+                More from Clay
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {relatedPosts.map((post) => (
+                <Link
+                  key={post.slug}
+                  href={`/blog/${post.slug}`}
+                  className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100 group block"
+                >
+                  <div className="relative h-44 bg-gray-100">
+                    {post.featuredImage ? (
+                      <Image
+                        src={post.featuredImage}
+                        alt={post.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Image src="/images/logo.png" alt="" width={80} height={24} className="opacity-20 object-contain" />
+                      </div>
+                    )}
+                    {primCat && (
+                      <span className={`absolute top-3 left-3 ${badgeColor} text-white text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md z-10`}>
+                        {primCat}
+                      </span>
+                    )}
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-[family-name:var(--font-playfair)] text-black text-sm font-bold leading-snug line-clamp-2 mb-2">
+                      {post.title}
+                    </h3>
+                    <span className="text-xs text-gray-400">By Clay · {post.date}</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   );
 }
