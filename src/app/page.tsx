@@ -83,7 +83,8 @@ function getAllPosts(): Post[] {
 /* ── Page ── */
 export default function HomePage() {
   const posts = getAllPosts();
-  const [featured, ...rest] = posts;
+  const [featured, ...allRest] = posts;
+  const rest = allRest.slice(0, 12); // 1 featured + 12 = 13 total
 
   return (
     <div className="bg-white text-black min-h-screen">
@@ -197,6 +198,18 @@ export default function HomePage() {
           ))}
 
         </div>
+      </section>
+
+      {/* ── See All Posts CTA ── */}
+      <section className="max-w-7xl mx-auto px-6 pb-16 flex justify-center">
+        <Link
+          href="/blog"
+          id="see-all-posts"
+          className="inline-flex items-center gap-3 bg-black text-white font-bold uppercase tracking-widest text-sm px-10 py-4 rounded-lg hover:bg-gray-800 transition-colors duration-200 shadow-lg hover:shadow-xl"
+        >
+          See All Posts
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </Link>
       </section>
     </div>
   );
