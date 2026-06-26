@@ -94,8 +94,10 @@ export async function generateMetadata({
     ?.slice(0, 160) || "";
 
   const title = data.title ?? slug;
-  // Truncate og:title to 60 chars — sweet spot for X, LinkedIn, Google
   const ogTitle = title.length > 60 ? title.slice(0, 57) + "…" : title;
+  const ogImage = data.featuredImage
+    ? `https://clayknowseverything.com${data.featuredImage}`
+    : "https://clayknowseverything.com/images/logo.png";
 
   return {
     title,
@@ -111,13 +113,13 @@ export async function generateMetadata({
       siteName: "Clay Knows Everything",
       publishedTime: data.date ? new Date(data.date).toISOString() : undefined,
       authors: ["Clay"],
-      // No images here — opengraph-image.tsx generates the correct 1200x630 card
+      images: [{ url: ogImage, width: 1200, height: 630, alt: ogTitle }],
     },
     twitter: {
       card: "summary_large_image",
       title: ogTitle,
       description: excerpt,
-      // No images here — twitter-image.tsx handles this
+      images: [ogImage],
     },
   };
 }
