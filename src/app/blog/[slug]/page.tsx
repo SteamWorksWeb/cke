@@ -82,19 +82,19 @@ export async function generateMetadata({
   const raw = fs.readFileSync(filePath, "utf8");
   const { data, content } = matter(raw);
 
-  // Extract clean excerpt from content for meta description
-  const excerpt = content
+  // Use explicit frontmatter description if available, else extract from content
+  const excerpt = data.description || content
     .replace(/!\[.*?\]\(.*?\)/g, "")
     .replace(/#{1,6}\s+/g, "")
     .replace(/\*\*|__|\*|_/g, "")
-    .replace(/\[([^\]]+)\]\([^\)]+\)/g, "$1")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
     .split("\n")
     .map((l: string) => l.trim())
     .filter(Boolean)[0]
     ?.slice(0, 160) || "";
 
   const title = data.title ?? slug;
-  const ogTitle = title.length > 60 ? title.slice(0, 57) + "…" : title;
+  const ogTitle = title.length > 60 ? title.slice(0, 57) + "\u2026" : title;
   const ogImage = data.featuredImage
     ? `https://clayknowseverything.com${data.featuredImage}`
     : "https://clayknowseverything.com/images/logo.png";
@@ -102,6 +102,7 @@ export async function generateMetadata({
   return {
     title,
     description: excerpt,
+    ...(data.noindex ? { robots: { index: false, follow: false } } : {}),
     alternates: {
       canonical: `https://clayknowseverything.com/blog/${slug}`,
     },
@@ -177,7 +178,7 @@ export default async function BlogPostPage({
     author: {
       "@type": "Person",
       name: "Clay",
-      url: "https://clayknowseverything.com",
+      url: "https://clayknowseverything.com/about",
     },
     publisher: {
       "@type": "Organization",
