@@ -45,6 +45,7 @@ export default async function Image({
   let title = "Clay Knows Everything";
   let primCat = "";
   let badgeColor = "#374151";
+  let featuredImageUrl: string | null = null;
 
   if (fs.existsSync(filePath)) {
     const { data } = matter(fs.readFileSync(filePath, "utf8"));
@@ -52,10 +53,12 @@ export default async function Image({
     const categories: string[] = Array.isArray(data.categories) ? data.categories : [];
     primCat = primaryCategory(categories);
     badgeColor = CATEGORY_COLORS[primCat] ?? "#374151";
+    if (data.featuredImage) {
+      featuredImageUrl = `https://clayknowseverything.com${data.featuredImage}`;
+    }
   }
 
-  // Truncate long titles
-  const displayTitle = title.length > 80 ? title.slice(0, 77) + "…" : title;
+  const displayTitle = title.length > 72 ? title.slice(0, 69) + "…" : title;
 
   return new ImageResponse(
     (
@@ -64,22 +67,43 @@ export default async function Image({
           width: "100%",
           height: "100%",
           display: "flex",
-          flexDirection: "column",
-          background: "#0a0a0a",
-          padding: "0",
           position: "relative",
           fontFamily: "sans-serif",
+          overflow: "hidden",
         }}
       >
-        {/* Top orange accent bar */}
+        {/* Background: featured image or solid black */}
+        {featuredImageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={featuredImageUrl}
+            alt=""
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+            }}
+          />
+        ) : (
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              background: "#0a0a0a",
+            }}
+          />
+        )}
+
+        {/* Dark gradient overlay so text is always readable */}
         <div
           style={{
             position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 10,
-            background: "linear-gradient(90deg, #f97316, #ea580c)",
+            inset: 0,
+            background:
+              "linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.65) 50%, rgba(0,0,0,0.25) 100%)",
+            display: "flex",
           }}
         />
 
@@ -90,82 +114,94 @@ export default async function Image({
             top: 0,
             left: 0,
             bottom: 0,
-            width: 6,
+            width: 8,
             background: "#f97316",
+            display: "flex",
           }}
         />
 
-        {/* Main content */}
+        {/* Top orange accent bar */}
         <div
           style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 8,
+            background: "linear-gradient(90deg, #f97316, #ea580c)",
+            display: "flex",
+          }}
+        />
+
+        {/* Content layer */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
             display: "flex",
             flexDirection: "column",
-            padding: "64px 72px 64px 80px",
-            flex: 1,
-            justifyContent: "space-between",
+            justifyContent: "flex-end",
+            padding: "48px 56px 48px 64px",
           }}
         >
-          {/* Top: category badge */}
-          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            {primCat && (
-              <div
-                style={{
-                  background: badgeColor,
-                  color: "#fff",
-                  padding: "8px 20px",
-                  borderRadius: 6,
-                  fontSize: 22,
-                  fontWeight: 700,
-                  letterSpacing: "0.12em",
-                  textTransform: "uppercase",
-                  display: "flex",
-                }}
-              >
-                {primCat}
-              </div>
-            )}
-          </div>
+          {/* Category badge */}
+          {primCat && (
+            <div
+              style={{
+                background: badgeColor,
+                color: "#fff",
+                padding: "7px 18px",
+                borderRadius: 6,
+                fontSize: 20,
+                fontWeight: 700,
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                alignSelf: "flex-start",
+                marginBottom: 20,
+                display: "flex",
+              }}
+            >
+              {primCat}
+            </div>
+          )}
 
-          {/* Middle: title */}
+          {/* Article title */}
           <div
             style={{
               color: "#ffffff",
-              fontSize: title.length > 60 ? 56 : 68,
+              fontSize: title.length > 50 ? 52 : 64,
               fontWeight: 800,
               lineHeight: 1.15,
-              flex: 1,
+              textShadow: "0 2px 12px rgba(0,0,0,0.8)",
+              marginBottom: 28,
               display: "flex",
-              alignItems: "center",
-              marginTop: 32,
-              marginBottom: 32,
             }}
           >
             {displayTitle}
           </div>
 
-          {/* Bottom: branding */}
+          {/* Footer branding */}
           <div
             style={{
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              borderTop: "1px solid #2a2a2a",
-              paddingTop: 28,
+              borderTop: "1px solid rgba(255,255,255,0.2)",
+              paddingTop: 20,
             }}
           >
-            {/* Logo text */}
-            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <div
                 style={{
-                  width: 48,
-                  height: 48,
+                  width: 40,
+                  height: 40,
                   borderRadius: "50%",
                   background: "#f97316",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   color: "#fff",
-                  fontSize: 24,
+                  fontSize: 20,
                   fontWeight: 700,
                 }}
               >
@@ -174,20 +210,18 @@ export default async function Image({
               <div
                 style={{
                   color: "#e5e7eb",
-                  fontSize: 28,
-                  fontWeight: 700,
-                  letterSpacing: "-0.01em",
+                  fontSize: 22,
+                  fontWeight: 600,
                   display: "flex",
                 }}
               >
                 Clay Knows Everything
               </div>
             </div>
-
             <div
               style={{
-                color: "#f97316",
-                fontSize: 22,
+                color: "#fb923c",
+                fontSize: 18,
                 fontWeight: 600,
                 display: "flex",
               }}
