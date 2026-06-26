@@ -87,6 +87,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: SITE_URL,
   },
+
+  icons: {
+    icon: "/images/favicon.ico",
+    shortcut: "/images/favicon.ico",
+    apple: "/images/favicon.ico",
+  },
 };
 
 export default function RootLayout({
