@@ -58,7 +58,7 @@ function getAllPosts(): Post[] {
     const featuredImage: string | null =
       data.featuredImage && data.featuredImage !== "" ? data.featuredImage : null;
 
-    // Plain-text excerpt from first paragraph
+    // Plain-text excerpt from first paragraph (skip author attribution lines)
     const excerpt = content
       .replace(/!\[.*?\]\(.*?\)/g, "")
       .replace(/#{1,6}\s+/g, "")
@@ -66,7 +66,7 @@ function getAllPosts(): Post[] {
       .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
       .split("\n")
       .map((l: string) => l.trim())
-      .filter(Boolean)[0]
+      .filter((l: string) => Boolean(l) && !/^by[:\s]/i.test(l))[0]
       ?.slice(0, 160) || "";
 
     // Use datetime (with time) when present, else bare date.
