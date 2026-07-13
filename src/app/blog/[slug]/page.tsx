@@ -259,10 +259,21 @@ export default async function BlogPostPage({
 
           {/* Hero text overlay */}
           <div className="absolute bottom-0 left-0 right-0 px-6 pb-10 max-w-4xl mx-auto w-full">
-            {primCat && (
-              <span className={`inline-block ${badgeColor} text-white text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-md mb-4`}>
-                {primCat}
-              </span>
+            {/* All category badges */}
+            {categories.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-4">
+                {categories.map((cat) => (
+                  <Link
+                    key={cat}
+                    href={`/category/${cat.toLowerCase().replace(" ", "-")}`}
+                    className={`inline-block ${
+                      CATEGORY_COLORS[cat] ?? "bg-gray-700"
+                    } text-white text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-md hover:opacity-80 transition-opacity`}
+                  >
+                    {cat}
+                  </Link>
+                ))}
+              </div>
             )}
             <h1 className="font-[family-name:var(--font-playfair)] text-3xl md:text-5xl font-bold text-white leading-tight drop-shadow-lg">
               {data.title}
@@ -277,10 +288,21 @@ export default async function BlogPostPage({
       {/* ── If no featured image, show plain header ── */}
       {!featuredImage && (
         <div className="max-w-4xl mx-auto px-6 pt-14 pb-8 border-b border-gray-100">
-          {primCat && (
-            <span className={`inline-block ${badgeColor} text-white text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-md mb-4`}>
-              {primCat}
-            </span>
+          {/* All category badges */}
+          {categories.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-4">
+              {categories.map((cat) => (
+                <Link
+                  key={cat}
+                  href={`/category/${cat.toLowerCase().replace(" ", "-")}`}
+                  className={`inline-block ${
+                    CATEGORY_COLORS[cat] ?? "bg-gray-700"
+                  } text-white text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-md hover:opacity-80 transition-opacity`}
+                >
+                  {cat}
+                </Link>
+              ))}
+            </div>
           )}
           <h1 className="font-[family-name:var(--font-playfair)] text-3xl md:text-5xl font-bold text-black leading-tight">
             {data.title}
@@ -306,10 +328,21 @@ export default async function BlogPostPage({
             <p className="text-sm font-semibold text-black">Clay</p>
             <p className="text-xs text-gray-400">{data.date} &nbsp;·&nbsp; {readingTime} min read</p>
           </div>
-          {primCat && (
-            <span className={`ml-auto ${badgeColor} text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-md`}>
-              {primCat}
-            </span>
+          {/* All category badges */}
+          {categories.length > 0 && (
+            <div className="ml-auto flex flex-wrap gap-1.5 justify-end">
+              {categories.map((cat) => (
+                <Link
+                  key={cat}
+                  href={`/category/${cat.toLowerCase().replace(" ", "-")}`}
+                  className={`${
+                    CATEGORY_COLORS[cat] ?? "bg-gray-700"
+                  } text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-md hover:opacity-80 transition-opacity`}
+                >
+                  {cat}
+                </Link>
+              ))}
+            </div>
           )}
         </div>
 
