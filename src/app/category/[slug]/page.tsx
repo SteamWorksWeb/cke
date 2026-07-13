@@ -60,9 +60,9 @@ interface Post {
 }
 
 /**
- * Only include posts whose PRIMARY category matches.
- * A post tagged ["Life","Tech"] has primary="Tech" — it belongs on
- * /category/tech ONLY, NOT on /category/life.
+ * Include posts that list this category anywhere in their categories array.
+ * A post tagged ["Life","Tech"] appears on BOTH /category/life AND /category/tech.
+ * The primary category is still used only for the badge display.
  */
 function getPostsByCategory(categoryName: string): Post[] {
   const contentDir = path.join(process.cwd(), "src", "content");
@@ -74,10 +74,14 @@ function getPostsByCategory(categoryName: string): Post[] {
       const { data, content } = matter(raw);
 
       const categories: string[] = Array.isArray(data.categories) ? data.categories : [];
-      const primCat = primaryCategory(categories);
 
-      // ── KEY FIX: only include if PRIMARY category matches ──
-      if (primCat.toLowerCase() !== categoryName.toLowerCase()) return null;
+      // Include if ANY of the post's categories matches (case-insensitive)
+      const belongs = categories.some(
+        (c) => c.toLowerCase() === categoryName.toLowerCase()
+      );
+      if (!belongs) return null;
+
+      const primCat = primaryCategory(categories);
 
       const featuredImage: string | null =
         data.featuredImage && data.featuredImage !== "" ? data.featuredImage : null;
