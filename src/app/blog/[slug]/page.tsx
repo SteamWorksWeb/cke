@@ -295,7 +295,7 @@ export default async function BlogPostPage({
         <div className="flex items-center gap-3 mb-10 pb-6 border-b border-gray-100">
           <div className="w-11 h-11 rounded-full overflow-hidden flex-shrink-0 border-2 border-gray-100">
             <Image
-              src="/images/clay.png"
+              src="/images/clay.webp"
               alt="Clay"
               width={44}
               height={44}

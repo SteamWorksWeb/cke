@@ -70,7 +70,7 @@ export default function AboutPage() {
           <div className="flex-shrink-0">
             <div className="w-48 h-48 rounded-2xl overflow-hidden border-4 border-gray-100 shadow-lg">
               <Image
-                src="/images/clay.png"
+                src="/images/clay.webp"
                 alt="Clay — the author of Clay Knows Everything"
                 width={192}
                 height={192}

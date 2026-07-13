@@ -1,7 +1,8 @@
 /**
  * convert-to-webp.mjs
- * Converts all JPG/JPEG/PNG images in public/images/ to WebP
- * and updates all MDX frontmatter references to use .webp versions.
+ * Converts all JPG/JPEG/PNG images in public/images/ to WebP,
+ * updates all MDX frontmatter references to use .webp versions,
+ * and deletes the original source file after a successful conversion.
  *
  * Run with: node scripts/convert-to-webp.mjs
  */
@@ -50,14 +51,19 @@ async function convertToWebP(filePath) {
   }
 
   try {
+    const origSize = fs.statSync(filePath).size;
+
     await sharp(filePath)
       .webp({ quality: 85 })
       .toFile(webpPath);
 
-    const origSize = fs.statSync(filePath).size;
     const webpSize = fs.statSync(webpPath).size;
     const savings = Math.round((1 - webpSize / origSize) * 100);
-    console.log(`  ✓  ${path.basename(filePath)} → ${path.basename(webpPath)} (${savings}% smaller)`);
+
+    // Delete the original now that WebP is confirmed on disk
+    fs.unlinkSync(filePath);
+
+    console.log(`  ✓  ${path.basename(filePath)} → ${path.basename(webpPath)} (${savings}% smaller, original deleted)`);
     converted++;
     return true;
   } catch (err) {
@@ -104,7 +110,7 @@ updateMdxReferences();
 
 console.log(`
 ✅ Done!
-   Converted:    ${converted} images
-   Skipped:      ${skipped} files  
-   MDX updated:  ${mdxUpdated} files
+   Converted & originals deleted: ${converted} images
+   Skipped (no conversion needed): ${skipped} files  
+   MDX updated:                   ${mdxUpdated} files
 `);

@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "migrate": "node scripts/migrate-wp.mjs"
+    "migrate": "node scripts/migrate-wp.mjs",
+    "convert": "node scripts/convert-to-webp.mjs",
+    "cleanup": "node scripts/cleanup-originals.mjs"
   },
   "dependencies": {
     "@tailwindcss/typography": "^0.5.20",
