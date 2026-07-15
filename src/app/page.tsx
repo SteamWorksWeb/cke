@@ -58,17 +58,19 @@ function getAllPosts(): Post[] {
     const featuredImage: string | null =
       data.featuredImage && data.featuredImage !== "" ? data.featuredImage : null;
 
-    // Plain-text excerpt from first paragraph (skip author attribution lines and JSX/HTML tags)
-    const excerpt = content
-      .replace(/!\[.*?\]\(.*?\)/g, "")
-      .replace(/#{1,6}\s+/g, "")
-      .replace(/\*\*|__|\*|_/g, "")
-      .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-      .replace(/<[^>]+>/g, "")          // strip HTML / JSX tags
-      .split("\n")
-      .map((l: string) => l.trim())
-      .filter((l: string) => Boolean(l) && !/^by[:\s]/i.test(l))[0]
-      ?.slice(0, 160) || "";
+    // Use explicit frontmatter excerpt if provided, otherwise derive from content
+    const excerpt: string = data.excerpt
+      ? String(data.excerpt).slice(0, 160)
+      : content
+          .replace(/!\[.*?\]\(.*?\)/g, "")
+          .replace(/#{1,6}\s+/g, "")
+          .replace(/\*\*|__|\*|_/g, "")
+          .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+          .replace(/<[^>]+>/g, "")          // strip HTML / JSX tags
+          .split("\n")
+          .map((l: string) => l.trim())
+          .filter((l: string) => Boolean(l) && !/^by[:\s]/i.test(l))[0]
+          ?.slice(0, 160) || "";
 
     // Use datetime (with time) when present, else bare date.
     // "2026-06-26T19:00:00" > "2026-06-26" lexicographically, so

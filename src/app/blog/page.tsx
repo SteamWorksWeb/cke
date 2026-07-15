@@ -80,17 +80,19 @@ function getAllPosts(): PostSummary[] {
           ? data.featuredImage
           : null;
 
-      const excerpt =
-        content
-          .replace(/!\[.*?\]\(.*?\)/g, "")
-          .replace(/#{1,6}\s+/g, "")
-          .replace(/\*\*|__|[*_]/g, "")
-          .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-          .replace(/<[^>]+>/g, "")          // strip HTML / JSX tags
-          .split("\n")
-          .map((l: string) => l.trim())
-          .filter(Boolean)[0]
-          ?.slice(0, 160) || "";
+      // Use explicit frontmatter excerpt if provided, otherwise derive from content
+      const excerpt: string = data.excerpt
+        ? String(data.excerpt).slice(0, 160)
+        : content
+            .replace(/!\[.*?\]\(.*?\)/g, "")
+            .replace(/#{1,6}\s+/g, "")
+            .replace(/\*\*|__|[*_]/g, "")
+            .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+            .replace(/<[^>]+>/g, "")          // strip HTML / JSX tags
+            .split("\n")
+            .map((l: string) => l.trim())
+            .filter(Boolean)[0]
+            ?.slice(0, 160) || "";
 
       const sortKey: string = data.datetime || data.date || "";
 
