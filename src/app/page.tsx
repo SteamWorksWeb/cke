@@ -58,12 +58,13 @@ function getAllPosts(): Post[] {
     const featuredImage: string | null =
       data.featuredImage && data.featuredImage !== "" ? data.featuredImage : null;
 
-    // Plain-text excerpt from first paragraph (skip author attribution lines)
+    // Plain-text excerpt from first paragraph (skip author attribution lines and JSX/HTML tags)
     const excerpt = content
       .replace(/!\[.*?\]\(.*?\)/g, "")
       .replace(/#{1,6}\s+/g, "")
       .replace(/\*\*|__|\*|_/g, "")
       .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+      .replace(/<[^>]+>/g, "")          // strip HTML / JSX tags
       .split("\n")
       .map((l: string) => l.trim())
       .filter((l: string) => Boolean(l) && !/^by[:\s]/i.test(l))[0]

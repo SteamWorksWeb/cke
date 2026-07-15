@@ -92,6 +92,7 @@ function getPostsByCategory(categoryName: string): Post[] {
           .replace(/#{1,6}\s+/g, "")
           .replace(/\*\*|__|\*|_/g, "")
           .replace(/\[([^\]]+)\]\([^\)]+\)/g, "$1")
+          .replace(/<[^>]+>/g, "")
           .split("\n")
           .map((l: string) => l.trim())
           .filter(Boolean)[0]

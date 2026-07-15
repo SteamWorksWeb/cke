@@ -86,6 +86,7 @@ function getAllPosts(): PostSummary[] {
           .replace(/#{1,6}\s+/g, "")
           .replace(/\*\*|__|[*_]/g, "")
           .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+          .replace(/<[^>]+>/g, "")          // strip HTML / JSX tags
           .split("\n")
           .map((l: string) => l.trim())
           .filter(Boolean)[0]
